@@ -1,0 +1,56 @@
+//Ameena's 
+
+void find_and_print_sum_of_nodes (BinarySearchTree::Node* T, int desired_sum, int cur_sum, string buffer){
+    //exit if T is NULL
+    if(!T) return;
+
+    //update the ongoing sum with the current value for T
+    int new_sum = cur_sum + T -> value;
+
+    //update the current path string
+    string digit = to_string(T->value);
+    string new_buffer = buffer + "" + digit;
+
+    //if the desired sum is found, print the corresponding path
+    if(new_sum == desired_sum)
+        cout << new_buffer << endl;
+    
+    //todo: continue down left subtree
+    if((T ->left ->value + cur_sum) >= cur_sum && (T ->left ->value + cur_sum) > (T ->right ->value + cur_sum))
+        return find_and_print_sum_of_nodes (T ->left, desired_sum, cur_sum, buffer);
+    
+    //todo: continue down right subtree
+    if((T ->right ->value + cur_sum) >= cur_sum && (T ->right ->value + cur_sum) > (T ->left ->value + cur_sum))
+        return find_and_print_sum_of_nodes (T ->right, desired_sum, cur_sum, buffer);
+    
+       //todo: restart from the left subtree is buffer == ""
+    if((T ->left ->value + cur_sum) >= cur_sum && (T ->left ->value + cur_sum) > (T ->right ->value + cur_sum) && buffer == "")
+        return find_and_print_sum_of_nodes (T ->left, desired_sum, cur_sum, buffer);
+       //todo: restart from the right subtree is buffer == ""
+    if((T ->right ->value + cur_sum) >= cur_sum && (T ->right ->value + cur_sum) > (T ->left ->value + cur_sum) && buffer == "")
+        return find_and_print_sum_of_nodes (T ->right, desired_sum, cur_sum, buffer);
+
+}
+
+//Works: 
+int find_max_sum(BinarySearchTree::Node* T, int &cur_max_sum){
+    if(!T)
+        return 0;
+    int left_sum = find_max_sum(T->left, cur_max_sum);
+    int right_sum = find_max_sum(T->right,cur_max_sum);
+    
+    int subtree_max = max(left_sum,right_sum);
+    
+    int max1 = max( T ->value, subtree_max + T ->value);
+    int max2 = max(max1, left_sum + right_sum + T->value);
+    
+    cur_max_sum = max(max2, cur_max_sum);
+    
+    return max1;
+}
+
+int find_max_sum(BinarySearchTree::Node*T) {
+    int temp_max_sum = INT_MIN;
+    find_max_sum(T, temp_max_sum);
+    return temp_max_sum;
+}
