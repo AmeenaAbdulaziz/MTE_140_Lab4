@@ -1,0 +1,376 @@
+//nancy wu submission
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <string>
+
+using namespace std;
+
+class BinaryTreeNode {
+	int val;
+	BinaryTreeNode* left, * right;
+public:
+	BinaryTreeNode(int new_val) : val(new_val), left(NULL), right(NULL) {}
+	void print() { cout << val << " "; }
+
+	friend class BinaryTree;
+	friend class BinaryTreeTest;	
+};
+
+class BinaryTree {
+	BinaryTreeNode* root;
+	int size;
+public:
+	BinaryTree() : root(NULL), size(0) {}
+	~BinaryTree() { clean_up(root); size = 0; root = NULL; }
+	friend class BinaryTreeTest;
+	
+	int min(BinaryTreeNode* T) {
+		if (!T) return -1;
+
+		BinaryTreeNode* cur = T;
+		while (cur && cur->left) 
+			cur = cur->left;		
+
+		return cur->val;
+	}
+	
+	int min() {
+		return min(root);
+	}
+	
+	int max(BinaryTreeNode* T) {
+		if (!T) return -1;
+
+		BinaryTreeNode* cur = T;
+		while (cur && cur->right) 
+			cur = cur->right;		
+
+		return cur->val;
+	}
+
+	int max() {
+		return max(root);
+	}
+	
+	bool exists(BinaryTreeNode* T, int key) {
+		BinaryTreeNode* cur = T;
+		while (cur) {
+			if (cur->val == key) 
+				return true;
+			
+			if (cur->val > key)
+				cur = cur->left;	
+			else
+				cur = cur->right;	
+		} 
+
+		return false;
+	}
+
+	bool exists(int key) {
+		return exists(root, key);
+	}
+
+	
+	bool insert(BinaryTreeNode new_node) {
+		BinaryTreeNode** cur = &root;
+		while (*cur) {
+			if ((*cur)->val == new_node.val) 
+				return false;
+			
+			if ((*cur)->val > new_node.val)
+				cur = &((*cur)->left);	
+			else
+				cur = &((*cur)->right);	
+		} 
+
+		*cur = new BinaryTreeNode(new_node);
+		++size;
+		
+		return true;		
+	}
+
+	void pre_order(BinaryTreeNode* T) {
+		if (T == NULL) return;
+		T->print();
+		pre_order(T->left);
+		pre_order(T->right);
+	}
+
+	void pre_order() {
+		pre_order(root);
+	}
+
+	void in_order(BinaryTreeNode* T) {
+		if (T == NULL) return;
+		in_order(T->left);
+		T->print();
+		in_order(T->right);
+	}
+
+	void in_order() {
+		in_order(root);
+	}
+
+	void post_order(BinaryTreeNode* T) {
+		if (T == NULL) return;
+		post_order(T->left);
+		post_order(T->right);
+		T->print();
+	}
+
+	void post_order() {
+		post_order(root);
+	}
+
+	void BFT(BinaryTreeNode* T) {
+		if (T == NULL) return;
+		
+		queue<BinaryTreeNode*> bft_queue;
+		bft_queue.push(T);
+
+		while(!bft_queue.empty()) {
+			BinaryTreeNode* cur = bft_queue.front();
+			bft_queue.pop();
+
+			cur->print();
+			if (cur->left) bft_queue.push(cur->left);
+			if (cur->right) bft_queue.push(cur->right);
+		}
+	}
+
+	void BFT() {
+		BFT(root);
+	}
+	
+	void clean_up(BinaryTreeNode* T) {
+		if (T == NULL) return;
+		clean_up(T->left);
+		clean_up(T->right);
+		delete T;
+	}
+
+	void find_and_print_sum_of_nodes(BinaryTreeNode* T, int desired_sum, int cur_sum, string buffer) {
+		//exit of T is null
+		if (!T)
+			return;
+
+		//update ongoing sum with current val for T
+		int new_sum = cur_sum + T->val;
+
+		//update current path string
+		string new_buffer = buffer + " " + to_string(T->val);
+
+		//if desired sum is found, print corresponding path
+		if (new_sum == desired_sum)
+			cout << new_buffer << endl;
+
+		//TODO: continue down left subtree
+		find_and_print_sum_of_nodes(T->left, desired_sum, new_sum, new_buffer);
+		//TODO: continue down right subtree
+		find_and_print_sum_of_nodes(T->right, desired_sum, new_sum, new_buffer);
+		//TODO: restart from the left subtree if buffer = ""
+		if (new_buffer.empty())
+			find_and_print_sum_of_nodes(T->left, desired_sum, 0, "");
+		//TODO: restart from right subtree if buffer = ""
+		if (buffer.empty())
+			find_and_print_sum_of_nodes(T->right, desired_sum, 0, "");
+	}
+  
+	int max(int a, int b, int c) {
+		int temp = (a < b) ? b : a;
+		return (temp < c) ? c : temp;
+
+	}
+
+	int find_max_sum_of_nodes(BinaryTreeNode* T, int& temp_max_sum) {
+		//exit if T null
+		if(!T)
+			return 0;
+		//derive max sum from left subtree
+		int left_sum = find_max_sum_of_nodes(T->left, temp_max_sum);
+
+		//derive mac sum for right subtree
+		int right_sum = find_max_sum_of_nodes(T->right, temp_max_sum);
+
+		//TODO: compare T->val, left_sum + t->val, and right_sum + t->val, store as max 1
+		int max1 = max(T->val, left_sum + T->val, right_sum + T->val);
+		//TODO: compare max1, left_sum + right_sum + T->val, store as max2
+		int max2 = (max1<left_sum + right_sum + T->val)?left_sum + right_sum + T->val:max1;
+		//TODO update temp_max_sum with new max
+    if (max2>temp_max_sum)
+		  temp_max_sum = max2;
+		//TODO return max1
+		return max1;
+	}
+
+	int find_max_sum_of_nodes(BinaryTreeNode* T) {
+		int temp_max_sum = 0;
+		find_max_sum_of_nodes(T, temp_max_sum);
+		return temp_max_sum;
+	}
+};
+
+class BinaryTreeTest {
+public:
+	void test_traversals(BinaryTree& test_tree) {
+		
+		cout << endl << "Test PreOrder Traversal" << endl;		
+		test_tree.pre_order();	
+
+		cout << endl << "Test InOrder Traversal" << endl;		
+		test_tree.in_order();	
+		
+		cout << endl << "Test PostOrder Traversal" << endl;		
+		test_tree.post_order();	
+		
+		cout << endl << "Test Breadth First Traversal" << endl;
+		test_tree.BFT();
+	}
+	
+	void test_scenario1() {
+		BinaryTree test_tree;
+
+		BinaryTreeNode* root = new BinaryTreeNode(14);
+		root->left = new BinaryTreeNode(12);
+		root->right = new BinaryTreeNode(25);
+		root->right->left = new BinaryTreeNode(21);
+		root->right->right = new BinaryTreeNode(36);
+
+		cout << "Min value is " << test_tree.min(root) << endl;
+		cout << "Max value is " << test_tree.max(root) << endl;
+
+		cout << (test_tree.exists(root, 25) ? "25 exists" : "25 does not exist") << endl;
+		cout << (test_tree.exists(root, 32) ? "32 exists" : "32 does not exist") << endl;
+		
+		test_tree.clean_up(root);	
+	}	
+	
+	void test_scenario2() {
+		BinaryTree test_tree;
+
+		test_tree.insert(BinaryTreeNode(15));
+		test_tree.insert(BinaryTreeNode(13));
+		test_tree.insert(BinaryTreeNode(11));
+		test_tree.insert(BinaryTreeNode(12));
+		test_tree.insert(BinaryTreeNode(14));
+		test_tree.insert(BinaryTreeNode(10));
+		test_tree.insert(BinaryTreeNode(9));
+		test_tree.insert(BinaryTreeNode(8));
+		test_tree.insert(BinaryTreeNode(7));
+
+		test_traversals(test_tree);
+	}	
+
+	void test_scenario3() {
+		BinaryTree test_tree;
+
+		test_tree.insert(BinaryTreeNode(15));
+		test_tree.insert(BinaryTreeNode(12));
+		test_tree.insert(BinaryTreeNode(14));
+		test_tree.insert(BinaryTreeNode(16));
+		test_tree.insert(BinaryTreeNode(11));
+		test_tree.insert(BinaryTreeNode(18));
+		test_tree.insert(BinaryTreeNode(13));
+		test_tree.insert(BinaryTreeNode(17));
+		test_tree.insert(BinaryTreeNode(19));
+
+		cout << endl << "Min value is " << test_tree.min() << endl;
+		cout << "Max value is " << test_tree.max() << endl;
+
+		cout << (test_tree.exists(16) ? "16 exists" : "16 does not exist") << endl;
+		cout << (test_tree.exists(42) ? "42 exists" : "42 does not exist") << endl;
+		
+		test_traversals(test_tree);	
+	}	
+
+	void test_scenario4() {//tests find_and_print_sum_of_nodes
+  cout << "Test find_and_print_sum_of_nodes" << endl;
+		BinaryTree test_tree;
+
+		test_tree.insert(BinaryTreeNode(5));
+		test_tree.insert(BinaryTreeNode(2));
+		test_tree.insert(BinaryTreeNode(4));
+		test_tree.insert(BinaryTreeNode(6));
+		test_tree.insert(BinaryTreeNode(1));
+		test_tree.insert(BinaryTreeNode(8));
+		test_tree.insert(BinaryTreeNode(3));
+		test_tree.insert(BinaryTreeNode(7));
+		test_tree.insert(BinaryTreeNode(9));
+
+    cout << "\n\nBFT of test tree:\n";
+    test_tree.BFT();
+
+    cout << "\nResults for sum of 7:\n";
+		test_tree.find_and_print_sum_of_nodes(test_tree.root, 7, 0, "");
+    cout << "Results for sum of 14:\n";
+		test_tree.find_and_print_sum_of_nodes(test_tree.root, 14, 0, "");
+    cout << "Results for sum of 8:\n";
+		test_tree.find_and_print_sum_of_nodes(test_tree.root, 8, 0, "");
+	}
+
+	void test_scenario5() {//tests find_max_sum_of_nodes
+  cout << "Test find_max_sum_of_nodes" << endl;
+		BinaryTree test_tree_1;
+    BinaryTree test_tree_2;
+    BinaryTree test_tree_3;
+
+		test_tree_1.insert(BinaryTreeNode(5));
+		test_tree_1.insert(BinaryTreeNode(2));
+		test_tree_1.insert(BinaryTreeNode(4));
+		test_tree_1.insert(BinaryTreeNode(6));
+		test_tree_1.insert(BinaryTreeNode(1));
+		test_tree_1.insert(BinaryTreeNode(8));
+		test_tree_1.insert(BinaryTreeNode(3));
+		test_tree_1.insert(BinaryTreeNode(7));
+		test_tree_1.insert(BinaryTreeNode(9));
+
+		test_tree_2.insert(BinaryTreeNode(7));
+		test_tree_2.insert(BinaryTreeNode(3));
+		test_tree_2.insert(BinaryTreeNode(12));
+		test_tree_2.insert(BinaryTreeNode(8));
+		test_tree_2.insert(BinaryTreeNode(6));
+		test_tree_2.insert(BinaryTreeNode(1));
+		test_tree_2.insert(BinaryTreeNode(7));
+		test_tree_2.insert(BinaryTreeNode(3));
+    
+		test_tree_3.insert(BinaryTreeNode(10));
+		test_tree_3.insert(BinaryTreeNode(14));
+		test_tree_3.insert(BinaryTreeNode(6));
+		test_tree_3.insert(BinaryTreeNode(3));
+		test_tree_3.insert(BinaryTreeNode(7));
+		test_tree_3.insert(BinaryTreeNode(21));
+		test_tree_3.insert(BinaryTreeNode(12));
+		test_tree_3.insert(BinaryTreeNode(2));
+		test_tree_3.insert(BinaryTreeNode(1));
+
+    cout << "\n\nBFT of test tree 1:\n";
+    test_tree_1.BFT();
+    cout << "\nMax sum of tree 1:\n";
+		cout << test_tree_1.find_max_sum_of_nodes(test_tree_1.root);
+
+    cout << "\nBFT of test tree 2:\n";
+    test_tree_2.BFT();
+    cout << "\nMax sum of tree 2:\n";
+		cout << test_tree_2.find_max_sum_of_nodes(test_tree_2.root);
+
+    cout << "\nBFT of test tree 3:\n";
+    test_tree_3.BFT();
+    cout << "\nMax sum of tree 3:\n";
+		cout << test_tree_3.find_max_sum_of_nodes(test_tree_3.root);
+	}
+
+	void run_tests() {
+		test_scenario1();
+		test_scenario2();	
+		test_scenario3();	
+		test_scenario4();	
+		test_scenario5();	
+	}
+};
+
+int main() {	
+	BinaryTreeTest test1;
+	test1.run_tests();
+}
